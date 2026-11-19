@@ -40,11 +40,11 @@ jobs:
       - name: Compilar executavel
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR-v1.7.1 --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
-          if (!(Test-Path 'dist/Legendas-PTBR-v1.7.1.exe')) { throw 'Executavel nao encontrado' }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR-v2.0 --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          if (!(Test-Path 'dist/Legendas-PTBR-v2.0.exe')) { throw 'Executavel nao encontrado' }
           @'
           import pefile
-          p = pefile.PE('dist/Legendas-PTBR-v1.7.1.exe')
+          p = pefile.PE('dist/Legendas-PTBR-v2.0.exe')
           icon_count = 0
           if hasattr(p, 'DIRECTORY_ENTRY_RESOURCE'):
               for entry in p.DIRECTORY_ENTRY_RESOURCE.entries:
@@ -58,6 +58,6 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: Legendas-PTBR-Windows-10
-          path: dist/Legendas-PTBR-v1.7.1.exe
+          path: dist/Legendas-PTBR-v2.0.exe
           if-no-files-found: error
           retention-days: 30
