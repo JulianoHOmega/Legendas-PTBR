@@ -23,19 +23,24 @@ def subtitle_exists(path):
     )
 
 
+def subtitle_score(subtitle, video):
+    """Subliminal versions return either an int or a (score, matches) tuple."""
+    from subliminal.score import compute_score
+    result = compute_score(subtitle, video)
+    return result[0] if isinstance(result, (tuple, list)) else result
+
+
 def search(path):
     video = scan_video(str(path))
     results = list(list_subtitles({video}, {LANGUAGE}).get(video, []))
     # Keep PT-BR and rank by release matching (Subliminal scoring).
-    from subliminal.score import compute_score
     results = [s for s in results if s.language == LANGUAGE]
-    results.sort(key=lambda s: compute_score(s, video)[0], reverse=True)
+    results.sort(key=lambda s: subtitle_score(s, video), reverse=True)
     return video, results
 
 
 def describe(sub, video):
-    from subliminal.score import compute_score
-    score, _ = compute_score(sub, video)
+    score = subtitle_score(sub, video)
     return {'provider': sub.provider_name, 'release': str(getattr(sub, 'release_info', '') or 'Não informado').replace('\n', ' ')[:140], 'score': score, 'subtitle': sub}
 
 

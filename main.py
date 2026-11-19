@@ -75,7 +75,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.2 (diagnóstico)')
+        self.setWindowTitle('Legendas PT-BR — 1.3')
         self.resize(940, 660)
         self.paths = []
         self.matches = []

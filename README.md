@@ -50,3 +50,7 @@ MIT. Consulte LICENSE.
 
 ## Diagnóstico v1.2
 Esta versão registra erros em `%USERPROFILE%\Legendas-PTBR\legendas.log` e falhas nativas em `falhas-nativas.log`. Se o aplicativo fechar durante a pesquisa, anexe esses arquivos ao relato (remova caminhos pessoais se desejar). A atualização também modifica o encerramento da thread Qt para reduzir problemas de ciclo de vida. Ainda requer teste no Windows 10.
+
+
+## v1.3
+Corrige erro `int object is not subscriptable` na pontuação do Subliminal, aceitando retorno inteiro ou tupla. Adiciona testes no GitHub Actions. Ainda requer teste real de pesquisa/download no Windows.
