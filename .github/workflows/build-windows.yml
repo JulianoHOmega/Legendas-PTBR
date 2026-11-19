@@ -1,0 +1,47 @@
+name: Compilar Windows EXE
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - '.github/workflows/build-windows.yml'
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Instalar dependencias
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Verificar sintaxe
+        run: python -m compileall -q main.py subtitle_engine.py
+      - name: Compilar executavel
+        shell: pwsh
+        run: |
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          if (!(Test-Path 'dist/Legendas-PTBR.exe')) { throw 'Executavel nao encontrado' }
+      - name: Publicar EXE como artefato
+        uses: actions/upload-artifact@v4
+        with:
+          name: Legendas-PTBR-Windows-10
+          path: dist/Legendas-PTBR.exe
+          if-no-files-found: error
+          retention-days: 30
