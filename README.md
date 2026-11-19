@@ -1,29 +1,20 @@
-# Legendas PT-BR — v1.7
+# Legendas PT-BR — v2.0
 
-Aplicativo Windows para encontrar e baixar legendas em português brasileiro. Modos automático e manual; vídeos individuais e pastas com subpastas.
+Programa Windows 10 para pesquisar e baixar legendas PT-BR em modo automatico ou manual. Aceita filmes, episodios de series e pastas inteiras.
 
-## Compilar sem instalar Python no computador
+## Compilar no GitHub, sem instalar Python no PC
 
-1. Extraia o ZIP e envie **o conteúdo** para a raiz do repositório GitHub, incluindo `.github/workflows/build-windows.yml` e `assets/`.
-2. Abra **Actions > Compilar Windows EXE > Run workflow**.
-3. Quando a execução terminar, baixe o artefato `Legendas-PTBR-Windows-10`.
-4. Extraia e execute `Legendas-PTBR-v1.7.exe` no Windows 10.
+1. Extraia o ZIP e envie o **conteudo da pasta** `Legendas-PTBR-v2.0` para a raiz do repositorio GitHub. Inclua `.github/workflows/build-windows.yml` e `assets/`.
+2. Acesse **Actions > Compilar Windows EXE > Run workflow**.
+3. Baixe o artefato `Legendas-PTBR-Windows-10` e extraia `Legendas-PTBR-v2.0.exe`.
 
-## Alterações da v1.7
+## Atualizacoes visuais da v2.0
 
-Baseada diretamente na v1.5 para evitar a regressão observada nas versões 1.6 e 1.6.1. Busca e download da v1.5 foram preservados.
+- Cabecalho da tabela sem quadrado branco no canto superior esquerdo.
+- Barra de titulo escura quando suportada pelo Windows 10 (usa DWM, sem alterar a janela nativa).
+- Mantem icone personalizado, modos automatico e manual, identificacao de series por pastas, cancelamento e protecao de legendas existentes.
+- A linha de caminho do log de diagnostico nao aparece na interface; arquivos de log tecnico continuam em `%USERPROFILE%\Legendas-PTBR`.
 
-- **Cancelar após a operação atual:** o cancelamento é cooperativo; aguarda a pesquisa ou download atual terminar e impede que novos vídeos sejam iniciados.
-- **Proteção de arquivos:** `.srt` já existente nunca é sobrescrito pelo aplicativo.
-- **Pastas:** vídeos em subpastas continuam sendo processados.
-- **Registro:** mensagens visíveis para resultados, erros e cancelamento; a linha de caminho do log de diagnóstico não é exibida.
+## Limites
 
-Para logs técnicos, veja `%USERPROFILE%\\Legendas-PTBR`.
-
-## Limitações
-
-A qualidade e disponibilidade das legendas dependem dos provedores externos. A sincronização não é garantida. Esta versão não implementa novo algoritmo de classificação; mantém o da v1.5.
-
-## v1.7.1 — Séries em pastas
-
-Exemplo: `Alien - Earth/1 (2025)/1 - Terra do nunca.mp4` será identificado como `Alien - Earth S01E01`, tanto ao selecionar o arquivo quanto ao selecionar a pasta. Filmes continuam usando a busca anterior. A correspondência é estimada e a sincronização deve ser conferida no player.
+Os provedores podem falhar ou nao disponibilizar legendas. A pontuacao e uma estimativa, e a sincronizacao deve ser conferida no player. A barra de titulo escura depende da versao e das configuracoes do Windows.

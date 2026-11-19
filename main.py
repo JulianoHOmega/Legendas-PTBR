@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
 
-VERSION = "1.7.1"
+VERSION = "2.0"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -94,7 +94,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.7.1')
+        self.setWindowTitle('Legendas PT-BR — 2.0')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.7.1')
+        title = QLabel('🎬  Legendas PT-BR  ·  v2.0')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setSortingEnabled(False)
         self.table.setAlternatingRowColors(True)
+        self.table.verticalHeader().setVisible(False)  # Remove coluna numerada e canto superior esquerdo
         self.table.setStyleSheet("QTableWidget { alternate-background-color: #283144; selection-background-color: #355b95; selection-color: white; } QTableWidget::item { color: #e9edf5; } QTableWidget::item:selected { background: #355b95; color: white; }")
         self.table.setToolTip('Ordenado por compatibilidade estimada; confirme a sincronização no player.')
         layout.addWidget(self.table)
@@ -170,7 +171,8 @@ class MainWindow(QMainWindow):
             QTableWidget::item { background-color: #222835; color: #e9edf5; }
             QTableWidget::item:alternate { background-color: #283144; color: #e9edf5; }
             QTableWidget::item:selected { background-color: #355b95; color: #ffffff; }
-            QHeaderView::section { background: #2c3547; color: #e9edf5; padding: 6px; }
+            QHeaderView::section { background: #2c3547; color: #e9edf5; padding: 6px; border: 1px solid #394154; }
+            QTableCornerButton::section { background: #2c3547; border: 1px solid #394154; }
             QProgressBar { border: 1px solid #394154; border-radius: 5px; text-align: center; }
             QProgressBar::chunk { background: #5287d7; }''')
 
@@ -264,16 +266,39 @@ class MainWindow(QMainWindow):
             QMessageBox.warning(self, 'Erro', str(exc))
 
 
+def enable_dark_title_bar(window):
+    """Solicita barra de titulo escura ao DWM em versoes compativeis do Windows 10/11."""
+    if sys.platform != 'win32':
+        return False
+    try:
+        import ctypes
+        from ctypes import wintypes
+        hwnd = wintypes.HWND(int(window.winId()))
+        value = ctypes.c_int(1)
+        dwm = ctypes.WinDLL('dwmapi')
+        dwm.DwmSetWindowAttribute.argtypes = [wintypes.HWND, wintypes.DWORD, ctypes.c_void_p, wintypes.DWORD]
+        dwm.DwmSetWindowAttribute.restype = ctypes.c_long
+        for attribute in (20, 19):
+            result = dwm.DwmSetWindowAttribute(hwnd, attribute, ctypes.byref(value), ctypes.sizeof(value))
+            if result == 0:
+                return True
+        logging.info('Barra de titulo escura nao suportada por esta versao do Windows')
+    except Exception:
+        logging.exception('Nao foi possivel configurar barra de titulo escura')
+    return False
+
+
 if __name__ == '__main__':
     logging.info("Aplicativo iniciado")
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.7.1')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.2.0')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
     window = MainWindow()
     window.show()
+    enable_dark_title_bar(window)
     sys.exit(app.exec())
