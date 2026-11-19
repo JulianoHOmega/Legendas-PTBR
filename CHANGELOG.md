@@ -1,8 +1,10 @@
 # Histórico
 
-## v1.5
-- Melhor exibição do release, quando disponível.
-- Deduplicação de candidatos com ou sem ID.
-- Mensagens de compatibilidade estimada.
-- Linha de log de diagnóstico removida da interface, mantendo os logs em arquivo.
-- Novo nome do executável no GitHub Actions.
+## v1.6
+- Classificação adicional por título, ano, episódio e release, quando esses metadados estão disponíveis.
+- Candidatos com contradições explícitas são rejeitados no modo automático.
+- Coluna de compatibilidade e explicação ao passar o mouse nos resultados manuais.
+- Mantidos o ícone, o modo automático/manual e a compilação Windows pelo GitHub Actions.
+- Mantidos logs técnicos em arquivo, sem exibir a linha de caminho de diagnóstico na interface.
+
+Observação: a pontuação é uma estimativa e não garante sincronização. Os provedores podem não fornecer todos os metadados.

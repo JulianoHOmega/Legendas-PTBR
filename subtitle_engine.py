@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 from subliminal import scan_video, list_subtitles, download_subtitles, save_subtitles
 from babelfish import Language
+from matching import evaluate, choose_automatic
 
 EXTENSIONS = {'.mkv', '.mp4', '.avi', '.mov', '.wmv', '.m4v', '.ts', '.webm'}
 LANGUAGE = Language('por', 'BR')
@@ -58,10 +59,7 @@ def candidate_key(sub):
 def search(path):
     video = scan_video(str(path))
     results = list(list_subtitles({video}, {LANGUAGE}).get(video, []))
-    # Keep PT-BR and rank by release matching (Subliminal scoring).
     results = [s for s in results if s.language == LANGUAGE]
-    results.sort(key=lambda s: subtitle_score(s, video), reverse=True)
-    # Remove only repeated provider IDs, preserving distinct releases and revisions.
     unique = []
     seen = set()
     for item in results:
@@ -69,13 +67,25 @@ def search(path):
         if key in seen:
             continue
         seen.add(key)
-        unique.append(item)
+        try:
+            score = subtitle_score(item, video)
+            assessment = evaluate(video, item, score, release_label(item))
+            unique.append({'subtitle': item, 'provider': item.provider_name,
+                           'release': release_label(item), 'language': 'PT-BR',
+                           'score': score, 'assessment': assessment})
+        except Exception:
+            # One malformed result must not abort the entire search.
+            continue
+    unique.sort(key=lambda item: item['assessment']['rank'], reverse=True)
     return video, unique[:150]
 
 
-def describe(sub, video):
-    score = subtitle_score(sub, video)
-    return {'provider': sub.provider_name, 'release': release_label(sub), 'language': 'PT-BR', 'score': score, 'subtitle': sub}
+def describe(row, video=None):
+    return row
+
+
+def best_automatic(rows):
+    return choose_automatic(rows)
 
 
 def download(path, video, subtitle):
