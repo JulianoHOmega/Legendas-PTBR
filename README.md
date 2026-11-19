@@ -31,3 +31,14 @@ Se o AppImage reclamar de FUSE, instale a biblioteca `libfuse2` (Ubuntu 22.04 / 
 ## O que foi alterado
 
 Somente identificacao da versao, workflows de compilacao e arquivos de empacotamento Linux. Motor de busca, download e interface preservados da v2.0.
+
+## Linux (TAR.GZ — v2.1.1)
+
+Em **Actions → Compilar Linux TAR.GZ → Run workflow**, baixe o artefato `Legendas-PTBR-Linux-TAR-GZ` e extraia o ZIP do artefato. Extraia o `.tar.gz` resultante e execute, dentro da pasta extraída:
+
+```bash
+chmod +x iniciar.sh Legendas-PTBR
+./iniciar.sh
+```
+
+O pacote usa PyInstaller `--onedir` e inclui as bibliotecas Python. O Linux ainda deve fornecer bibliotecas de sistema compatíveis. O workflow Windows foi preservado.
