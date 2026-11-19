@@ -1,44 +1,99 @@
-# Legendas PT-BR — v2.1 (Windows + Linux)
+<div align="center">
 
-Mesma interface e motor de legendas da versao 2.0; compilacao multiplataforma pelo GitHub Actions.
+# 🎬 Legendas PT-BR
 
-## Compilar sem instalar Python
+### Encontre e baixe legendas em português brasileiro para seus filmes e séries
 
-1. Extraia o ZIP e envie **o conteudo da pasta** para a raiz do repositorio (inclua `.github/`, `assets/` e `packaging/`).
-2. Em **Actions**, execute **Compilar Windows EXE** e/ou **Compilar Linux AppImage**.
-3. Apos a execucao bem-sucedida, baixe os arquivos em **Artifacts**.
+[![Windows](https://img.shields.io/badge/Windows-compatível-0078D4?logo=windows&logoColor=white)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)
+[![Linux](https://img.shields.io/badge/Linux-x86__64-FCC624?logo=linux&logoColor=black)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)
+[![Python](https://img.shields.io/badge/Python-projeto-3776AB?logo=python&logoColor=white)](https://github.com/JulianoHOmega/Legendas-PTBR)
+[![License: MIT](https://img.shields.io/badge/Licença-MIT-green.svg)](LICENSE)
 
-**Windows:** `Legendas-PTBR-v2.1.exe`.
+**[📥 Downloads e versões](https://github.com/JulianoHOmega/Legendas-PTBR/releases)** · **[⚙️ Compilações (Actions)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)** · **[🐛 Reportar problema](https://github.com/JulianoHOmega/Legendas-PTBR/issues/new)** · **[🤝 Contribuir](CONTRIBUTING.md)**
 
-**Linux (x86_64):** `Legendas-PTBR-v2.1-Linux-x86_64.AppImage`. Em um terminal na pasta do arquivo:
+</div>
+
+---
+
+## ✨ Sobre o projeto
+
+O **Legendas PT-BR** é um aplicativo de desktop para facilitar a busca e o download de legendas em português brasileiro para vídeos locais. Possui interface gráfica, suporte a filmes e episódios de séries e versões para Windows e Linux.
+
+## 🚀 Funcionalidades
+
+- 🔎 Busca de legendas para filmes e séries.
+- 📺 Identificação de episódios por temporada e número do episódio, inclusive em estruturas de pastas.
+- 🖱️ Pesquisa e seleção de legendas pela interface gráfica.
+- 📁 Processamento de arquivos de vídeo e suporte a operações em lote.
+- ⏹️ Possibilidade de cancelar operações.
+- 🪟 Interface gráfica com visual escuro.
+- 🐧 Distribuição para Linux em pacote `.tar.gz`.
+- ⚙️ Compilação por GitHub Actions, sem exigir Python dos usuários dos executáveis.
+
+> **Importante:** os resultados e downloads dependem da disponibilidade de provedores externos. Nem sempre haverá uma legenda adequada ou sincronizada para cada vídeo.
+
+## 📥 Download e uso
+
+Acesse **[Releases](https://github.com/JulianoHOmega/Legendas-PTBR/releases)** para conferir versões publicadas. Caso os executáveis ainda não estejam anexados a uma Release, consulte **[Actions](https://github.com/JulianoHOmega/Legendas-PTBR/actions)** e os artefatos das compilações bem-sucedidas.
+
+### 🪟 Windows
+
+1. Baixe o executável Windows disponibilizado pelo projeto.
+2. Abra o arquivo `.exe`.
+3. Selecione seus vídeos e pesquise as legendas.
+
+### 🐧 Linux (x86_64)
+
+1. Baixe o pacote Linux `.tar.gz` disponibilizado pelo projeto.
+2. Extraia o arquivo, preservando a estrutura das pastas.
+3. Abra o executável **`Legendas-PTBR`** diretamente dentro da pasta extraída.
+
+Se o Linux não permitir a execução por falta de permissão, abra um terminal na pasta do executável e execute:
 
 ```bash
-chmod +x Legendas-PTBR-v2.1-Linux-x86_64.AppImage
-./Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+chmod +x ./Legendas-PTBR
+./Legendas-PTBR
 ```
 
-Se o AppImage reclamar de FUSE, instale a biblioteca `libfuse2` (Ubuntu 22.04 / derivados) ou execute com `APPIMAGE_EXTRACT_AND_RUN=1 ./Legendas-PTBR-v2.1-Linux-x86_64.AppImage`.
+**Não é necessário usar `iniciar.sh` nem instalar Python** para executar o pacote já compilado. A compatibilidade pode variar conforme a distribuição e as bibliotecas disponíveis no sistema.
 
-## Compatibilidade e observacoes
+## 🛠️ Código-fonte e desenvolvimento
 
-- Linux x86_64; compilado no Ubuntu 22.04 para ampliar compatibilidade com distribuicoes atuais. Nao ha garantia de compatibilidade com todas as distribuicoes/versoes, Wayland, ARM ou ambientes sem bibliotecas Qt/XCB.
-- A barra de titulo escura e gerenciada pelo ambiente grafico no Linux. O ajuste DWM e executado somente no Windows.
-- Logs tecnicos em `~/Legendas-PTBR/`, sem linha de diagnostico na interface.
-- A busca e o download dependem de provedores externos; a sincronizacao nao e garantida.
-- O GitHub Actions disponibiliza artefatos para download. **Nao anexa automaticamente os binarios a uma GitHub Release.**
-- Se o GitHub reportar falha na etapa AppImage, confira o log do workflow; isso nao implica falha no programa Windows.
-
-## O que foi alterado
-
-Somente identificacao da versao, workflows de compilacao e arquivos de empacotamento Linux. Motor de busca, download e interface preservados da v2.0.
-
-## Linux (TAR.GZ — v2.1.1)
-
-Em **Actions → Compilar Linux TAR.GZ → Run workflow**, baixe o artefato `Legendas-PTBR-Linux-TAR-GZ` e extraia o ZIP do artefato. Extraia o `.tar.gz` resultante e execute, dentro da pasta extraída:
+O projeto utiliza Python e disponibiliza o código-fonte neste repositório.
 
 ```bash
-chmod +x iniciar.sh Legendas-PTBR
-./iniciar.sh
+git clone https://github.com/JulianoHOmega/Legendas-PTBR.git
+cd Legendas-PTBR
+python -m venv .venv
 ```
 
-O pacote usa PyInstaller `--onedir` e inclui as bibliotecas Python. O Linux ainda deve fornecer bibliotecas de sistema compatíveis. O workflow Windows foi preservado.
+Ative o ambiente virtual e instale as dependências:
+
+```bash
+pip install -r requirements.txt
+python main.py
+```
+
+> Para desenvolver, é necessário ter uma versão compatível do Python e as dependências do projeto. Os comandos de ativação do ambiente virtual variam entre Windows e Linux.
+
+## 🤝 Como contribuir
+
+Sugestões, relatórios de bugs e melhorias são bem-vindos! Leia o **[guia de contribuição](CONTRIBUTING.md)** antes de enviar alterações.
+
+- [Abrir uma issue](https://github.com/JulianoHOmega/Legendas-PTBR/issues/new)
+- [Ver pull requests](https://github.com/JulianoHOmega/Legendas-PTBR/pulls)
+- [Consultar histórico de alterações](CHANGELOG.md)
+
+## ⚖️ Licença e responsabilidade
+
+O código deste projeto é disponibilizado sob a **[Licença MIT](LICENSE)**. As legendas encontradas podem estar sujeitas a direitos e condições próprios dos provedores e respectivos titulares. Respeite a legislação aplicável e os termos dos serviços utilizados.
+
+---
+
+<div align="center">
+
+Feito para tornar a busca por legendas PT-BR mais prática. 🇧🇷
+
+**[⬆️ Voltar ao início](#-legendas-pt-br)**
+
+</div>
