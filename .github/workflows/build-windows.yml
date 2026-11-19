@@ -32,6 +32,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r requirements.txt
+          python -m pip install pefile
       - name: Verificar sintaxe
         run: python -m compileall -q main.py subtitle_engine.py
       - name: Testar pontuacao
@@ -39,12 +40,24 @@ jobs:
       - name: Compilar executavel
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
-          if (!(Test-Path 'dist/Legendas-PTBR.exe')) { throw 'Executavel nao encontrado' }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR-v1.4.1 --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          if (!(Test-Path 'dist/Legendas-PTBR-v1.4.1.exe')) { throw 'Executavel nao encontrado' }
+          @'
+          import pefile
+          p = pefile.PE('dist/Legendas-PTBR-v1.4.1.exe')
+          icon_count = 0
+          if hasattr(p, 'DIRECTORY_ENTRY_RESOURCE'):
+              for entry in p.DIRECTORY_ENTRY_RESOURCE.entries:
+                  if entry.id == 3:  # RT_ICON
+                      icon_count = len(entry.directory.entries)
+          print(f'Icon resources embedded: {icon_count}')
+          if not icon_count:
+              raise SystemExit('ERRO: EXE sem icone incorporado')
+          '@ | python -
       - name: Publicar EXE como artefato
         uses: actions/upload-artifact@v4
         with:
           name: Legendas-PTBR-Windows-10
-          path: dist/Legendas-PTBR.exe
+          path: dist/Legendas-PTBR-v1.4.1.exe
           if-no-files-found: error
           retention-days: 30
