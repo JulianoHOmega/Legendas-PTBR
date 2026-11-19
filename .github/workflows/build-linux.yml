@@ -49,7 +49,6 @@ jobs:
           mkdir -p package/Legendas-PTBR
           cp -a dist/Legendas-PTBR/. package/Legendas-PTBR/
           cp packaging/linux/iniciar.sh package/Legendas-PTBR/iniciar.sh
-          cp packaging/linux/LEIA-ME-LINUX.txt package/Legendas-PTBR/LEIA-ME-LINUX.txt
           chmod +x package/Legendas-PTBR/iniciar.sh package/Legendas-PTBR/Legendas-PTBR
           tar -czf Legendas-PTBR-v2.1.1-Linux-x86_64.tar.gz -C package Legendas-PTBR
           test -s Legendas-PTBR-v2.1.1-Linux-x86_64.tar.gz
