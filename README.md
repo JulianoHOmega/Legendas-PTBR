@@ -1,20 +1,33 @@
-# Legendas PT-BR — v2.0
+# Legendas PT-BR — v2.1 (Windows + Linux)
 
-Programa Windows 10 para pesquisar e baixar legendas PT-BR em modo automatico ou manual. Aceita filmes, episodios de series e pastas inteiras.
+Mesma interface e motor de legendas da versao 2.0; compilacao multiplataforma pelo GitHub Actions.
 
-## Compilar no GitHub, sem instalar Python no PC
+## Compilar sem instalar Python
 
-1. Extraia o ZIP e envie o **conteudo da pasta** `Legendas-PTBR-v2.0` para a raiz do repositorio GitHub. Inclua `.github/workflows/build-windows.yml` e `assets/`.
-2. Acesse **Actions > Compilar Windows EXE > Run workflow**.
-3. Baixe o artefato `Legendas-PTBR-Windows-10` e extraia `Legendas-PTBR-v2.0.exe`.
+1. Extraia o ZIP e envie **o conteudo da pasta** para a raiz do repositorio (inclua `.github/`, `assets/` e `packaging/`).
+2. Em **Actions**, execute **Compilar Windows EXE** e/ou **Compilar Linux AppImage**.
+3. Apos a execucao bem-sucedida, baixe os arquivos em **Artifacts**.
 
-## Atualizacoes visuais da v2.0
+**Windows:** `Legendas-PTBR-v2.1.exe`.
 
-- Cabecalho da tabela sem quadrado branco no canto superior esquerdo.
-- Barra de titulo escura quando suportada pelo Windows 10 (usa DWM, sem alterar a janela nativa).
-- Mantem icone personalizado, modos automatico e manual, identificacao de series por pastas, cancelamento e protecao de legendas existentes.
-- A linha de caminho do log de diagnostico nao aparece na interface; arquivos de log tecnico continuam em `%USERPROFILE%\Legendas-PTBR`.
+**Linux (x86_64):** `Legendas-PTBR-v2.1-Linux-x86_64.AppImage`. Em um terminal na pasta do arquivo:
 
-## Limites
+```bash
+chmod +x Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+./Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+```
 
-Os provedores podem falhar ou nao disponibilizar legendas. A pontuacao e uma estimativa, e a sincronizacao deve ser conferida no player. A barra de titulo escura depende da versao e das configuracoes do Windows.
+Se o AppImage reclamar de FUSE, instale a biblioteca `libfuse2` (Ubuntu 22.04 / derivados) ou execute com `APPIMAGE_EXTRACT_AND_RUN=1 ./Legendas-PTBR-v2.1-Linux-x86_64.AppImage`.
+
+## Compatibilidade e observacoes
+
+- Linux x86_64; compilado no Ubuntu 22.04 para ampliar compatibilidade com distribuicoes atuais. Nao ha garantia de compatibilidade com todas as distribuicoes/versoes, Wayland, ARM ou ambientes sem bibliotecas Qt/XCB.
+- A barra de titulo escura e gerenciada pelo ambiente grafico no Linux. O ajuste DWM e executado somente no Windows.
+- Logs tecnicos em `~/Legendas-PTBR/`, sem linha de diagnostico na interface.
+- A busca e o download dependem de provedores externos; a sincronizacao nao e garantida.
+- O GitHub Actions disponibiliza artefatos para download. **Nao anexa automaticamente os binarios a uma GitHub Release.**
+- Se o GitHub reportar falha na etapa AppImage, confira o log do workflow; isso nao implica falha no programa Windows.
+
+## O que foi alterado
+
+Somente identificacao da versao, workflows de compilacao e arquivos de empacotamento Linux. Motor de busca, download e interface preservados da v2.0.
