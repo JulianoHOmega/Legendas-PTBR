@@ -1,25 +1,16 @@
-# Legendas PT-BR v1.4
+# Legendas PT-BR — v1.5
 
-Aplicativo Windows 10/11 para buscar legendas PT-BR em vídeos individuais ou pastas inteiras.
+Aplicativo Windows para pesquisar e baixar legendas PT-BR de vídeos individuais ou pastas inteiras, com modos automático e manual.
 
-## Novidades da versão 1.4
-- Ícone personalizado no executável, janela e barra de tarefas.
-- Coluna de idioma PT-BR.
-- Limite de 150 resultados por vídeo para evitar travamentos com listas enormes.
-- Remoção de IDs duplicados do mesmo provedor.
-- Continua com os modos automático e manual.
+## Novidades v1.5
+- Apresentação mais consistente de metadados de release, quando o provedor os informa.
+- Remoção de resultados repetidos por ID do provedor; fallback para release/idioma quando não há ID.
+- Aviso de que a pontuação é uma estimativa e não garante sincronização.
+- Removida da interface a linha inicial que exibia o caminho do log de diagnóstico. Os logs técnicos permanecem disponíveis para investigar falhas.
+- Ícone personalizado preservado e configuração de compilação atualizada.
 
-## Compilar sem Python local
-1. Extraia o ZIP e envie **o conteúdo** para a raiz do repositório GitHub, incluindo `.github` e `assets`.
-2. Na aba Actions execute **Compilar Windows EXE** (ou faça push na branch principal).
-3. Baixe o artefato `Legendas-PTBR-Windows-10`.
-4. Extraia e execute `Legendas-PTBR.exe`.
-
-O GitHub instala Python e dependências temporariamente no runner Windows. O usuário final não precisa de Python.
+## Compilar no GitHub
+Envie o conteúdo desta pasta para a raiz do repositório, incluindo `.github/workflows/build-windows.yml` e `assets`. Abra **Actions**, execute **Compilar Windows EXE** e baixe o artefato gerado. Não é necessário instalar Python no computador.
 
 ## Observações
-- As legendas dependem dos provedores externos e podem não corresponder ao vídeo.
-- A pontuação é heurística; não garante sincronização.
-- Em modo automático, o programa salva a melhor pontuação, sem confirmação manual.
-- Registro: `%USERPROFILE%\Legendas-PTBR\legendas.log`.
-- O progresso exibido dentro do aplicativo representa arquivos processados, não progresso geral do desenvolvimento.
+A pesquisa depende dos provedores externos e pode falhar por indisponibilidade ou restrições de acesso. Teste as legendas no player; resultados com pontuação alta podem estar incorretos. O modo automático salva a primeira opção classificada. Use o modo manual para conferir as alternativas.

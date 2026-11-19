@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
 
-VERSION = "1.4"
+VERSION = "1.5"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -63,12 +63,13 @@ class Worker(QObject):
                         self.log.emit('  Nenhuma legenda PT-BR encontrada.')
                         continue
                     if self.automatic:
+                        self.log.emit('  Seleção automática: maior pontuação estimada; sincronização não garantida.')
                         dest = download(path, video, subtitles[0])
                         self.log.emit(f'  Salvo: {dest.name}')
                     else:
                         rows = [describe(sub, video) for sub in subtitles]
                         self.candidates.emit((str(path), video, rows))
-                        self.log.emit(f'  {len(rows)} opção(ões) encontradas.')
+                        self.log.emit(f'  {len(rows)} opção(ões) encontradas (máximo de 150 por vídeo).')
                 except Exception as exc:
                     logging.exception('Erro durante a busca: %s', path)
                     self.log.emit(f'  Erro: {exc}')
@@ -83,7 +84,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.4')
+        self.setWindowTitle('Legendas PT-BR — 1.5')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -94,7 +95,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.4')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.5')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -130,6 +131,9 @@ class MainWindow(QMainWindow):
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
+        self.table.setSortingEnabled(False)
+        self.table.setAlternatingRowColors(True)
+        self.table.setToolTip('Ordenado por compatibilidade estimada; confirme a sincronização no player.')
         layout.addWidget(self.table)
         self.get_selected = QPushButton('Baixar legenda selecionada')
         self.get_selected.clicked.connect(self.download_selected)
@@ -139,7 +143,6 @@ class MainWindow(QMainWindow):
         self.log = QTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumHeight(145)
-        self.log.append(f'Log de diagnostico: {LOG_FILE}')
         layout.addWidget(self.log)
         self.setStyleSheet('''QWidget { background: #171b24; color: #e9edf5; font-size: 13px; }
             QPushButton { background: #344c7d; border: 0; border-radius: 6px; padding: 10px; }
@@ -198,6 +201,7 @@ class MainWindow(QMainWindow):
                 cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, col, cell)
         self.get_selected.setEnabled(bool(self.matches))
+        self.log.append(f'  Exibidas {len(rows)} opções para {Path(path).name} (ordem de compatibilidade estimada).')
 
     @Slot(int, int)
     def update_progress(self, current, total):
@@ -208,7 +212,7 @@ class MainWindow(QMainWindow):
         self.start.setEnabled(True)
         self.file_btn.setEnabled(True)
         self.folder_btn.setEnabled(True)
-        self.log.append('Pesquisa concluída.')
+        self.log.append('Pesquisa concluída. Verifique a sincronização das legendas no player.')
         self.thread = None
         self.worker = None
 
@@ -233,7 +237,7 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.4')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.5')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)

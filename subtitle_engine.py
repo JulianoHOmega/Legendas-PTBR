@@ -30,6 +30,31 @@ def subtitle_score(subtitle, video):
     return result[0] if isinstance(result, (tuple, list)) else result
 
 
+def release_label(sub):
+    """Prefer provider release metadata; never invent a release."""
+    for attr in ('release_info', 'release', 'filename'):
+        value = getattr(sub, attr, None)
+        if value:
+            if isinstance(value, (list, tuple, set)):
+                value = ', '.join(map(str, value))
+            label = re.sub(r'\s+', ' ', str(value)).strip()
+            if label:
+                return label[:140]
+    return 'Não informado'
+
+
+def candidate_key(sub):
+    """Keep distinct IDs; deduplicate exact provider/release pairs when ID absent."""
+    provider = str(getattr(sub, 'provider_name', '')).casefold()
+    identifier = getattr(sub, 'id', None)
+    if identifier is not None:
+        return (provider, 'id', str(identifier))
+    release = release_label(sub)
+    if release == 'Não informado':
+        return (provider, 'object', id(sub))
+    return (provider, 'release', release.casefold(), str(getattr(sub, 'language', '')))
+
+
 def search(path):
     video = scan_video(str(path))
     results = list(list_subtitles({video}, {LANGUAGE}).get(video, []))
@@ -40,20 +65,17 @@ def search(path):
     unique = []
     seen = set()
     for item in results:
-        provider = str(getattr(item, 'provider_name', ''))
-        identifier = getattr(item, 'id', None)
-        if identifier is not None:
-            key = (provider, str(identifier))
-            if key in seen:
-                continue
-            seen.add(key)
+        key = candidate_key(item)
+        if key in seen:
+            continue
+        seen.add(key)
         unique.append(item)
     return video, unique[:150]
 
 
 def describe(sub, video):
     score = subtitle_score(sub, video)
-    return {'provider': sub.provider_name, 'release': str(getattr(sub, 'release_info', '') or getattr(sub, 'hearing_impaired', None) and 'Sem release (SDH)' or 'Não informado').replace('\n', ' ')[:140], 'language': 'PT-BR', 'score': score, 'subtitle': sub}
+    return {'provider': sub.provider_name, 'release': release_label(sub), 'language': 'PT-BR', 'score': score, 'subtitle': sub}
 
 
 def download(path, video, subtitle):
