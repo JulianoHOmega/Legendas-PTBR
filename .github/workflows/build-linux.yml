@@ -1,0 +1,70 @@
+name: Compilar Linux AppImage
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - 'assets/**'
+      - '.github/workflows/build-linux.yml'
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 40
+    steps:
+      - name: Obter codigo
+        uses: actions/checkout@v4
+      - name: Bibliotecas do Qt e ferramentas
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libxcb-cursor0 libxcb-xinerama0 libxkbcommon-x11-0 libgl1 libegl1 libfuse2 file desktop-file-utils
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - name: Instalar dependencias
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements.txt
+      - name: Verificar sintaxe e executar testes
+        run: |
+          python -m compileall -q main.py subtitle_engine.py series_detection.py
+          python -m unittest discover -s tests -v
+      - name: Compilar aplicativo Linux
+        run: |
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name Legendas-PTBR --add-data 'assets/legendas.png:assets' --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          test -x dist/Legendas-PTBR/Legendas-PTBR
+      - name: Criar AppDir
+        run: |
+          mkdir -p AppDir/usr/bin AppDir/usr/share/icons/hicolor/256x256/apps
+          cp -a dist/Legendas-PTBR/. AppDir/usr/bin/
+          cp assets/legendas.png AppDir/usr/share/icons/hicolor/256x256/apps/legendas-ptbr.png
+          cp assets/legendas.png AppDir/legendas-ptbr.png
+          cp packaging/linux/legendas-ptbr.desktop AppDir/legendas-ptbr.desktop
+          cp packaging/linux/AppRun AppDir/AppRun
+          chmod +x AppDir/AppRun
+          desktop-file-validate AppDir/legendas-ptbr.desktop
+      - name: Empacotar AppImage
+        env:
+          ARCH: x86_64
+        run: |
+          curl --fail --location --retry 3 --output appimagetool.AppImage https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
+          chmod +x appimagetool.AppImage
+          APPIMAGE_EXTRACT_AND_RUN=1 ./appimagetool.AppImage AppDir Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+          test -s Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+      - name: Publicar AppImage
+        uses: actions/upload-artifact@v4
+        with:
+          name: Legendas-PTBR-Linux-AppImage
+          path: Legendas-PTBR-v2.1-Linux-x86_64.AppImage
+          if-no-files-found: error
+          retention-days: 30
