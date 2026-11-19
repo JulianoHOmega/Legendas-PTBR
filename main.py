@@ -10,9 +10,9 @@ from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QFileDialog, QComboBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
-from subtitle_engine import videos_in, subtitle_exists, search, describe, download, best_automatic
+from subtitle_engine import videos_in, subtitle_exists, search, describe, download
 
-VERSION = "1.6.1"
+VERSION = "1.5"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -63,32 +63,11 @@ class Worker(QObject):
                         self.log.emit('  Nenhuma legenda PT-BR encontrada.')
                         continue
                     if self.automatic:
-                        selected = best_automatic(subtitles)
-                        if selected is None:
-                            self.log.emit('  Nenhuma opção segura: resultados apresentam dados incompatíveis. Use o modo manual.')
-                            continue
-                        self.log.emit(f"  Seleção automática: {selected['assessment']['confidence']}. {selected['assessment']['reason']}")
-                        self.log.emit('  Sincronização não garantida: confira no player.')
-                        attempts = 0
-                        saved = False
-                        # Se o provedor nao entregar o conteudo, tentar outro candidato.
-                        for candidate in [selected] + [r for r in subtitles if r is not selected and r['assessment']['safe']]:
-                            attempts += 1
-                            try:
-                                dest = download(path, video, candidate['subtitle'])
-                                self.log.emit(f'  Salvo: {dest.name}')
-                                saved = True
-                                break
-                            except Exception as download_error:
-                                logging.warning('Falha na opcao %s: %s', attempts, download_error, exc_info=True)
-                                if attempts <= 3:
-                                    self.log.emit(f'  Opção {attempts} indisponível; tentando outra legenda...')
-                            if attempts >= 10:
-                                break
-                        if not saved:
-                            self.log.emit('  Não foi possível baixar nenhuma das opções tentadas. Experimente o modo manual.')
+                        self.log.emit('  Seleção automática: maior pontuação estimada; sincronização não garantida.')
+                        dest = download(path, video, subtitles[0])
+                        self.log.emit(f'  Salvo: {dest.name}')
                     else:
-                        rows = subtitles
+                        rows = [describe(sub, video) for sub in subtitles]
                         self.candidates.emit((str(path), video, rows))
                         self.log.emit(f'  {len(rows)} opção(ões) encontradas (máximo de 150 por vídeo).')
                 except Exception as exc:
@@ -105,7 +84,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.6.1')
+        self.setWindowTitle('Legendas PT-BR — 1.5')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -116,7 +95,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.6.1')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.5')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -146,8 +125,8 @@ class MainWindow(QMainWindow):
         self.progress = QProgressBar()
         layout.addWidget(self.progress)
         layout.addWidget(QLabel('Resultados (modo manual):'))
-        self.table = QTableWidget(0, 6)
-        self.table.setHorizontalHeaderLabels(['Vídeo', 'Provedor', 'Release', 'Idioma', 'Pontuação', 'Compatibilidade'])
+        self.table = QTableWidget(0, 5)
+        self.table.setHorizontalHeaderLabels(['Vídeo', 'Provedor', 'Release', 'Idioma', 'Pontuação'])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -217,10 +196,9 @@ class MainWindow(QMainWindow):
             row = self.table.rowCount()
             self.table.insertRow(row)
             self.matches.append((path, video, item['subtitle']))
-            for col, value in enumerate((Path(path).name, item['provider'], item['release'], item['language'], str(item['score']), item['assessment']['confidence'])):
+            for col, value in enumerate((Path(path).name, item['provider'], item['release'], item['language'], str(item['score']))):
                 cell = QTableWidgetItem(value)
                 cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
-                cell.setToolTip(item['assessment']['reason'])
                 self.table.setItem(row, col, cell)
         self.get_selected.setEnabled(bool(self.matches))
         self.log.append(f'  Exibidas {len(rows)} opções para {Path(path).name} (ordem de compatibilidade estimada).')
@@ -259,7 +237,7 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.6.1')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.5')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)
