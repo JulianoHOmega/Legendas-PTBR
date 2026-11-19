@@ -47,3 +47,6 @@ O arquivo de vídeo é analisado localmente para extrair metadados e identificad
 ## Licença
 
 MIT. Consulte LICENSE.
+
+## Diagnóstico v1.2
+Esta versão registra erros em `%USERPROFILE%\Legendas-PTBR\legendas.log` e falhas nativas em `falhas-nativas.log`. Se o aplicativo fechar durante a pesquisa, anexe esses arquivos ao relato (remova caminhos pessoais se desejar). A atualização também modifica o encerramento da thread Qt para reduzir problemas de ciclo de vida. Ainda requer teste no Windows 10.

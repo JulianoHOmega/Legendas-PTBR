@@ -1,10 +1,28 @@
 import sys
+import logging
+import traceback
+import faulthandler
+from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from PySide6.QtCore import QObject, QThread, Signal, Slot, Qt
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QFileDialog, QComboBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
+
+LOG_DIR = Path.home() / "Legendas-PTBR"
+LOG_DIR.mkdir(parents=True, exist_ok=True)
+LOG_FILE = LOG_DIR / "legendas.log"
+logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(threadName)s %(message)s", handlers=[RotatingFileHandler(LOG_FILE, maxBytes=2_000_000, backupCount=2, encoding="utf-8")])
+FAULT_FILE = open(LOG_DIR / "falhas-nativas.log", "a", encoding="utf-8")
+faulthandler.enable(file=FAULT_FILE, all_threads=True)
+
+def report_exception(exc_type, exc, tb):
+    logging.critical("Erro nao tratado", exc_info=(exc_type, exc, tb))
+    traceback.print_exception(exc_type, exc, tb, file=FAULT_FILE)
+    FAULT_FILE.flush()
+
+sys.excepthook = report_exception
 
 
 class Worker(QObject):
@@ -24,12 +42,15 @@ class Worker(QObject):
         try:
             total = len(self.paths)
             for index, path in enumerate(self.paths, 1):
+                logging.info('Iniciando %s (%s/%s)', path, index, total)
                 self.log.emit(f'[{index}/{total}] {path.name}')
                 try:
                     if self.skip_existing and subtitle_exists(path):
                         self.log.emit('  Ignorado: legenda externa já existente.')
                         continue
+                    logging.info("Pesquisando legenda: %s", path)
                     video, subtitles = search(path)
+                    logging.info("Busca retornou %d legendas", len(subtitles))
                     if not subtitles:
                         self.log.emit('  Nenhuma legenda PT-BR encontrada.')
                         continue
@@ -41,9 +62,12 @@ class Worker(QObject):
                         self.candidates.emit((str(path), video, rows))
                         self.log.emit(f'  {len(rows)} opção(ões) encontradas.')
                 except Exception as exc:
+                    logging.exception('Erro durante a busca: %s', path)
                     self.log.emit(f'  Erro: {exc}')
                 finally:
                     self.progress.emit(index, total)
+        except BaseException:
+            logging.exception("Falha fatal no trabalhador")
         finally:
             self.finished.emit()
 
@@ -51,11 +75,12 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.0')
+        self.setWindowTitle('Legendas PT-BR — 1.2 (diagnóstico)')
         self.resize(940, 660)
         self.paths = []
         self.matches = []
         self.thread = None
+        self.worker = None
         root = QWidget()
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
@@ -105,6 +130,7 @@ class MainWindow(QMainWindow):
         self.log = QTextEdit()
         self.log.setReadOnly(True)
         self.log.setMaximumHeight(145)
+        self.log.append(f'Log de diagnostico: {LOG_FILE}')
         layout.addWidget(self.log)
         self.setStyleSheet('''QWidget { background: #171b24; color: #e9edf5; font-size: 13px; }
             QPushButton { background: #344c7d; border: 0; border-radius: 6px; padding: 10px; }
@@ -144,11 +170,10 @@ class MainWindow(QMainWindow):
         self.worker.moveToThread(self.thread)
         self.thread.started.connect(self.worker.run)
         self.worker.log.connect(self.log.append)
-        self.worker.progress.connect(lambda i, total: self.progress.setValue(i))
+        self.worker.progress.connect(self.update_progress)
         self.worker.candidates.connect(self.add_matches)
         self.worker.finished.connect(self.thread.quit)
-        self.worker.finished.connect(self.worker.deleteLater)
-        self.thread.finished.connect(self.thread.deleteLater)
+        self.thread.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.done)
         self.thread.start()
 
@@ -165,6 +190,10 @@ class MainWindow(QMainWindow):
                 self.table.setItem(row, col, cell)
         self.get_selected.setEnabled(bool(self.matches))
 
+    @Slot(int, int)
+    def update_progress(self, current, total):
+        self.progress.setValue(current)
+
     @Slot()
     def done(self):
         self.start.setEnabled(True)
@@ -172,6 +201,7 @@ class MainWindow(QMainWindow):
         self.folder_btn.setEnabled(True)
         self.log.append('Pesquisa concluída.')
         self.thread = None
+        self.worker = None
 
     def download_selected(self):
         row = self.table.currentRow()
@@ -184,11 +214,13 @@ class MainWindow(QMainWindow):
             self.log.append(f'Legenda salva: {output}')
             QMessageBox.information(self, 'Sucesso', f'Legenda salva em:\n{output}')
         except Exception as exc:
+            logging.exception('Erro no download manual')
             self.log.append(f'Falha ao baixar: {exc}')
             QMessageBox.warning(self, 'Erro', str(exc))
 
 
 if __name__ == '__main__':
+    logging.info("Aplicativo iniciado")
     app = QApplication(sys.argv)
     window = MainWindow()
     window.show()
