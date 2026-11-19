@@ -78,13 +78,15 @@ def describe(sub, video):
     return {'provider': sub.provider_name, 'release': release_label(sub), 'language': 'PT-BR', 'score': score, 'subtitle': sub}
 
 
-def download(path, video, subtitle):
+def download(path, video, subtitle, overwrite=False):
+    output = Path(path).with_suffix('.srt')
+    if output.exists() and not overwrite:
+        raise FileExistsError(f"Legenda já existe: {output.name}. O arquivo não foi sobrescrito.")
     # Fetch subtitle content and save with the video's basename.
     download_subtitles([subtitle])
     if not subtitle.content:
         raise RuntimeError('O provedor não retornou o conteúdo da legenda.')
     save_subtitles(video, [subtitle], single=True)
-    output = Path(path).with_suffix('.srt')
     if not output.exists():
         raise RuntimeError('A legenda foi baixada, mas não foi encontrada no destino esperado.')
     return output

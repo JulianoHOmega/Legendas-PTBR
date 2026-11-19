@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
 
-VERSION = "1.5"
+VERSION = "1.7"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -44,12 +44,19 @@ class Worker(QObject):
         self.paths = paths
         self.automatic = automatic
         self.skip_existing = skip_existing
+        self._cancel_requested = False
+
+    def cancel(self):
+        self._cancel_requested = True
 
     @Slot()
     def run(self):
         try:
             total = len(self.paths)
             for index, path in enumerate(self.paths, 1):
+                if self._cancel_requested:
+                    self.log.emit("Pesquisa cancelada. Os vídeos restantes não foram processados.")
+                    break
                 logging.info('Iniciando %s (%s/%s)', path, index, total)
                 self.log.emit(f'[{index}/{total}] {path.name}')
                 try:
@@ -62,9 +69,12 @@ class Worker(QObject):
                     if not subtitles:
                         self.log.emit('  Nenhuma legenda PT-BR encontrada.')
                         continue
+                    if self._cancel_requested:
+                        self.log.emit("Cancelamento solicitado; download não iniciado.")
+                        break
                     if self.automatic:
                         self.log.emit('  Seleção automática: maior pontuação estimada; sincronização não garantida.')
-                        dest = download(path, video, subtitles[0])
+                        dest = download(path, video, subtitles[0], overwrite=False)
                         self.log.emit(f'  Salvo: {dest.name}')
                     else:
                         rows = [describe(sub, video) for sub in subtitles]
@@ -84,7 +94,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.5')
+        self.setWindowTitle('Legendas PT-BR — 1.7')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -95,7 +105,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.5')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.7')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -121,7 +131,13 @@ class MainWindow(QMainWindow):
         layout.addLayout(options)
         self.start = QPushButton('Buscar legendas')
         self.start.clicked.connect(self.begin)
-        layout.addWidget(self.start)
+        action_line = QHBoxLayout()
+        action_line.addWidget(self.start)
+        self.cancel_btn = QPushButton("Cancelar após a operação atual")
+        self.cancel_btn.setEnabled(False)
+        self.cancel_btn.clicked.connect(self.request_cancel)
+        action_line.addWidget(self.cancel_btn)
+        layout.addLayout(action_line)
         self.progress = QProgressBar()
         layout.addWidget(self.progress)
         layout.addWidget(QLabel('Resultados (modo manual):'))
@@ -172,9 +188,11 @@ class MainWindow(QMainWindow):
         self.matches.clear()
         self.table.setRowCount(0)
         self.get_selected.setEnabled(False)
+        self.log.append(f"Iniciando processamento de {len(self.paths)} vídeo(s).")
         self.progress.setMaximum(len(self.paths))
         self.progress.setValue(0)
         self.start.setEnabled(False)
+        self.cancel_btn.setEnabled(True)
         self.file_btn.setEnabled(False)
         self.folder_btn.setEnabled(False)
         self.thread = QThread()
@@ -188,6 +206,12 @@ class MainWindow(QMainWindow):
         self.thread.finished.connect(self.worker.deleteLater)
         self.thread.finished.connect(self.done)
         self.thread.start()
+
+    def request_cancel(self):
+        if self.worker is not None:
+            self.worker.cancel()
+            self.cancel_btn.setEnabled(False)
+            self.log.append("Cancelamento solicitado; aguardando a operação atual terminar...")
 
     @Slot(object)
     def add_matches(self, result):
@@ -210,6 +234,7 @@ class MainWindow(QMainWindow):
     @Slot()
     def done(self):
         self.start.setEnabled(True)
+        self.cancel_btn.setEnabled(False)
         self.file_btn.setEnabled(True)
         self.folder_btn.setEnabled(True)
         self.log.append('Pesquisa concluída. Verifique a sincronização das legendas no player.')
@@ -223,7 +248,7 @@ class MainWindow(QMainWindow):
             return
         path, video, subtitle = self.matches[row]
         try:
-            output = download(path, video, subtitle)
+            output = download(path, video, subtitle, overwrite=False)
             self.log.append(f'Legenda salva: {output}')
             QMessageBox.information(self, 'Sucesso', f'Legenda salva em:\n{output}')
         except Exception as exc:
@@ -237,7 +262,7 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.5')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.7')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)

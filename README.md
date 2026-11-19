@@ -1,16 +1,25 @@
-# Legendas PT-BR — v1.5
+# Legendas PT-BR — v1.7
 
-Aplicativo Windows para pesquisar e baixar legendas PT-BR de vídeos individuais ou pastas inteiras, com modos automático e manual.
+Aplicativo Windows para encontrar e baixar legendas em português brasileiro. Modos automático e manual; vídeos individuais e pastas com subpastas.
 
-## Novidades v1.5
-- Apresentação mais consistente de metadados de release, quando o provedor os informa.
-- Remoção de resultados repetidos por ID do provedor; fallback para release/idioma quando não há ID.
-- Aviso de que a pontuação é uma estimativa e não garante sincronização.
-- Removida da interface a linha inicial que exibia o caminho do log de diagnóstico. Os logs técnicos permanecem disponíveis para investigar falhas.
-- Ícone personalizado preservado e configuração de compilação atualizada.
+## Compilar sem instalar Python no computador
 
-## Compilar no GitHub
-Envie o conteúdo desta pasta para a raiz do repositório, incluindo `.github/workflows/build-windows.yml` e `assets`. Abra **Actions**, execute **Compilar Windows EXE** e baixe o artefato gerado. Não é necessário instalar Python no computador.
+1. Extraia o ZIP e envie **o conteúdo** para a raiz do repositório GitHub, incluindo `.github/workflows/build-windows.yml` e `assets/`.
+2. Abra **Actions > Compilar Windows EXE > Run workflow**.
+3. Quando a execução terminar, baixe o artefato `Legendas-PTBR-Windows-10`.
+4. Extraia e execute `Legendas-PTBR-v1.7.exe` no Windows 10.
 
-## Observações
-A pesquisa depende dos provedores externos e pode falhar por indisponibilidade ou restrições de acesso. Teste as legendas no player; resultados com pontuação alta podem estar incorretos. O modo automático salva a primeira opção classificada. Use o modo manual para conferir as alternativas.
+## Alterações da v1.7
+
+Baseada diretamente na v1.5 para evitar a regressão observada nas versões 1.6 e 1.6.1. Busca e download da v1.5 foram preservados.
+
+- **Cancelar após a operação atual:** o cancelamento é cooperativo; aguarda a pesquisa ou download atual terminar e impede que novos vídeos sejam iniciados.
+- **Proteção de arquivos:** `.srt` já existente nunca é sobrescrito pelo aplicativo.
+- **Pastas:** vídeos em subpastas continuam sendo processados.
+- **Registro:** mensagens visíveis para resultados, erros e cancelamento; a linha de caminho do log de diagnóstico não é exibida.
+
+Para logs técnicos, veja `%USERPROFILE%\\Legendas-PTBR`.
+
+## Limitações
+
+A qualidade e disponibilidade das legendas dependem dos provedores externos. A sincronização não é garantida. Esta versão não implementa novo algoritmo de classificação; mantém o da v1.5.
