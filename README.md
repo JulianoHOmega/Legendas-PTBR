@@ -23,3 +23,7 @@ Para logs técnicos, veja `%USERPROFILE%\\Legendas-PTBR`.
 ## Limitações
 
 A qualidade e disponibilidade das legendas dependem dos provedores externos. A sincronização não é garantida. Esta versão não implementa novo algoritmo de classificação; mantém o da v1.5.
+
+## v1.7.1 — Séries em pastas
+
+Exemplo: `Alien - Earth/1 (2025)/1 - Terra do nunca.mp4` será identificado como `Alien - Earth S01E01`, tanto ao selecionar o arquivo quanto ao selecionar a pasta. Filmes continuam usando a busca anterior. A correspondência é estimada e a sincronização deve ser conferida no player.

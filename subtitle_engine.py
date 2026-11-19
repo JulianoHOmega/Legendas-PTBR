@@ -3,6 +3,7 @@ from pathlib import Path
 import re
 from subliminal import scan_video, list_subtitles, download_subtitles, save_subtitles
 from babelfish import Language
+from series_detection import identify_episode, mismatched_episode_release
 
 EXTENSIONS = {'.mkv', '.mp4', '.avi', '.mov', '.wmv', '.m4v', '.ts', '.webm'}
 LANGUAGE = Language('por', 'BR')
@@ -57,9 +58,20 @@ def candidate_key(sub):
 
 def search(path):
     video = scan_video(str(path))
+    episode_info = identify_episode(path)
+    if episode_info:
+        # Subliminal's scanner cannot infer the series from files such as
+        # "1 - Terra do nunca.mp4". Construct an Episode explicitly.
+        from subliminal.video import Episode
+        video = Episode(str(path), episode_info.series, episode_info.season,
+                        [episode_info.episode], title=episode_info.title,
+                        year=episode_info.year)
     results = list(list_subtitles({video}, {LANGUAGE}).get(video, []))
     # Keep PT-BR and rank by release matching (Subliminal scoring).
     results = [s for s in results if s.language == LANGUAGE]
+    if episode_info:
+        # Do not offer a subtitle that explicitly names a different season/episode.
+        results = [s for s in results if not mismatched_episode_release(release_label(s), episode_info)]
     results.sort(key=lambda s: subtitle_score(s, video), reverse=True)
     # Remove only repeated provider IDs, preserving distinct releases and revisions.
     unique = []

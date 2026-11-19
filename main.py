@@ -6,13 +6,13 @@ import faulthandler
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from PySide6.QtCore import QObject, QThread, Signal, Slot, Qt
-from PySide6.QtGui import QIcon
+from PySide6.QtGui import QIcon, QColor, QBrush
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QFileDialog, QComboBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
 
-VERSION = "1.7"
+VERSION = "1.7.1"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -94,7 +94,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.7')
+        self.setWindowTitle('Legendas PT-BR — 1.7.1')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.7')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.7.1')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -149,6 +149,7 @@ class MainWindow(QMainWindow):
         self.table.setSelectionMode(QTableWidget.SelectionMode.SingleSelection)
         self.table.setSortingEnabled(False)
         self.table.setAlternatingRowColors(True)
+        self.table.setStyleSheet("QTableWidget { alternate-background-color: #283144; selection-background-color: #355b95; selection-color: white; } QTableWidget::item { color: #e9edf5; } QTableWidget::item:selected { background: #355b95; color: white; }")
         self.table.setToolTip('Ordenado por compatibilidade estimada; confirme a sincronização no player.')
         layout.addWidget(self.table)
         self.get_selected = QPushButton('Baixar legenda selecionada')
@@ -165,7 +166,11 @@ class MainWindow(QMainWindow):
             QPushButton:hover { background: #4565a5; }
             QPushButton:disabled { background: #353945; color: #8e929b; }
             QComboBox, QTableWidget, QTextEdit { background: #222835; border: 1px solid #394154; border-radius: 5px; padding: 4px; }
-            QHeaderView::section { background: #2c3547; padding: 6px; }
+            QTableWidget { alternate-background-color: #283144; selection-background-color: #355b95; selection-color: #ffffff; gridline-color: #394154; }
+            QTableWidget::item { background-color: #222835; color: #e9edf5; }
+            QTableWidget::item:alternate { background-color: #283144; color: #e9edf5; }
+            QTableWidget::item:selected { background-color: #355b95; color: #ffffff; }
+            QHeaderView::section { background: #2c3547; color: #e9edf5; padding: 6px; }
             QProgressBar { border: 1px solid #394154; border-radius: 5px; text-align: center; }
             QProgressBar::chunk { background: #5287d7; }''')
 
@@ -223,6 +228,8 @@ class MainWindow(QMainWindow):
             for col, value in enumerate((Path(path).name, item['provider'], item['release'], item['language'], str(item['score']))):
                 cell = QTableWidgetItem(value)
                 cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
+                cell.setForeground(QBrush(QColor('#e9edf5')))
+                cell.setBackground(QBrush(QColor('#222835' if row % 2 == 0 else '#283144')))
                 self.table.setItem(row, col, cell)
         self.get_selected.setEnabled(bool(self.matches))
         self.log.append(f'  Exibidas {len(rows)} opções para {Path(path).name} (ordem de compatibilidade estimada).')
@@ -262,7 +269,7 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.7')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.7.1')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)
