@@ -12,7 +12,7 @@ from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, 
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download, best_automatic
 
-VERSION = "1.6"
+VERSION = "1.6.1"
 
 def resource_path(relative):
     return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
@@ -69,10 +69,26 @@ class Worker(QObject):
                             continue
                         self.log.emit(f"  Seleção automática: {selected['assessment']['confidence']}. {selected['assessment']['reason']}")
                         self.log.emit('  Sincronização não garantida: confira no player.')
-                        dest = download(path, video, selected['subtitle'])
-                        self.log.emit(f'  Salvo: {dest.name}')
+                        attempts = 0
+                        saved = False
+                        # Se o provedor nao entregar o conteudo, tentar outro candidato.
+                        for candidate in [selected] + [r for r in subtitles if r is not selected and r['assessment']['safe']]:
+                            attempts += 1
+                            try:
+                                dest = download(path, video, candidate['subtitle'])
+                                self.log.emit(f'  Salvo: {dest.name}')
+                                saved = True
+                                break
+                            except Exception as download_error:
+                                logging.warning('Falha na opcao %s: %s', attempts, download_error, exc_info=True)
+                                if attempts <= 3:
+                                    self.log.emit(f'  Opção {attempts} indisponível; tentando outra legenda...')
+                            if attempts >= 10:
+                                break
+                        if not saved:
+                            self.log.emit('  Não foi possível baixar nenhuma das opções tentadas. Experimente o modo manual.')
                     else:
-                        rows = [describe(sub, video) for sub in subtitles]
+                        rows = subtitles
                         self.candidates.emit((str(path), video, rows))
                         self.log.emit(f'  {len(rows)} opção(ões) encontradas (máximo de 150 por vídeo).')
                 except Exception as exc:
@@ -89,7 +105,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.6')
+        self.setWindowTitle('Legendas PT-BR — 1.6.1')
         self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
@@ -100,7 +116,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v1.6')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.6.1')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -243,7 +259,7 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.6')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.6.1')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)

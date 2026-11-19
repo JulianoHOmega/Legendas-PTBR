@@ -23,3 +23,7 @@ Logs técnicos permanecem em `%USERPROFILE%\\Legendas-PTBR\\legendas.log`. O cam
 ## Limitações
 
 A versão 1.6 ainda precisa de testes reais no Windows. A busca depende dos provedores disponíveis e da conexão com a internet. O download pode retornar legendas que necessitam de ajuste de sincronização.
+
+
+### Correções v1.6.1
+Busca automática tenta até 10 alternativas quando um provedor falha; o modo manual foi corrigido. Legendas .srt existentes não são sobrescritas.

@@ -93,8 +93,10 @@ def download(path, video, subtitle):
     download_subtitles([subtitle])
     if not subtitle.content:
         raise RuntimeError('O provedor não retornou o conteúdo da legenda.')
-    save_subtitles(video, [subtitle], single=True)
     output = Path(path).with_suffix('.srt')
+    if output.exists():
+        raise FileExistsError(f'Já existe uma legenda em {output.name}; arquivo preservado.')
+    save_subtitles(video, [subtitle], single=True)
     if not output.exists():
         raise RuntimeError('A legenda foi baixada, mas não foi encontrada no destino esperado.')
     return output
