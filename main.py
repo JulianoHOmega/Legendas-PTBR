@@ -1,14 +1,22 @@
 import sys
+import os
 import logging
 import traceback
 import faulthandler
 from logging.handlers import RotatingFileHandler
 from pathlib import Path
 from PySide6.QtCore import QObject, QThread, Signal, Slot, Qt
+from PySide6.QtGui import QIcon
 from PySide6.QtWidgets import (QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QPushButton, QLabel, QFileDialog, QComboBox, QTableWidget, QTableWidgetItem,
     QHeaderView, QProgressBar, QTextEdit, QMessageBox, QCheckBox)
 from subtitle_engine import videos_in, subtitle_exists, search, describe, download
+
+VERSION = "1.4"
+
+def resource_path(relative):
+    return Path(getattr(sys, "_MEIPASS", Path(__file__).resolve().parent)) / relative
+
 
 LOG_DIR = Path.home() / "Legendas-PTBR"
 LOG_DIR.mkdir(parents=True, exist_ok=True)
@@ -75,7 +83,8 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 1.3')
+        self.setWindowTitle('Legendas PT-BR — 1.4')
+        self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
         self.resize(940, 660)
         self.paths = []
         self.matches = []
@@ -85,7 +94,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('Legendas PT-BR')
+        title = QLabel('🎬  Legendas PT-BR  ·  v1.4')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -115,8 +124,8 @@ class MainWindow(QMainWindow):
         self.progress = QProgressBar()
         layout.addWidget(self.progress)
         layout.addWidget(QLabel('Resultados (modo manual):'))
-        self.table = QTableWidget(0, 4)
-        self.table.setHorizontalHeaderLabels(['Vídeo', 'Provedor', 'Release', 'Pontuação'])
+        self.table = QTableWidget(0, 5)
+        self.table.setHorizontalHeaderLabels(['Vídeo', 'Provedor', 'Release', 'Idioma', 'Pontuação'])
         self.table.horizontalHeader().setSectionResizeMode(0, QHeaderView.ResizeMode.Stretch)
         self.table.horizontalHeader().setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -184,7 +193,7 @@ class MainWindow(QMainWindow):
             row = self.table.rowCount()
             self.table.insertRow(row)
             self.matches.append((path, video, item['subtitle']))
-            for col, value in enumerate((Path(path).name, item['provider'], item['release'], str(item['score']))):
+            for col, value in enumerate((Path(path).name, item['provider'], item['release'], item['language'], str(item['score']))):
                 cell = QTableWidgetItem(value)
                 cell.setFlags(cell.flags() & ~Qt.ItemFlag.ItemIsEditable)
                 self.table.setItem(row, col, cell)
@@ -221,7 +230,14 @@ class MainWindow(QMainWindow):
 
 if __name__ == '__main__':
     logging.info("Aplicativo iniciado")
+    if sys.platform == 'win32':
+        try:
+            import ctypes
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.1.4')
+        except Exception:
+            logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)
+    app.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
     window = MainWindow()
     window.show()
     sys.exit(app.exec())

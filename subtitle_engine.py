@@ -36,12 +36,24 @@ def search(path):
     # Keep PT-BR and rank by release matching (Subliminal scoring).
     results = [s for s in results if s.language == LANGUAGE]
     results.sort(key=lambda s: subtitle_score(s, video), reverse=True)
-    return video, results
+    # Remove only repeated provider IDs, preserving distinct releases and revisions.
+    unique = []
+    seen = set()
+    for item in results:
+        provider = str(getattr(item, 'provider_name', ''))
+        identifier = getattr(item, 'id', None)
+        if identifier is not None:
+            key = (provider, str(identifier))
+            if key in seen:
+                continue
+            seen.add(key)
+        unique.append(item)
+    return video, unique[:150]
 
 
 def describe(sub, video):
     score = subtitle_score(sub, video)
-    return {'provider': sub.provider_name, 'release': str(getattr(sub, 'release_info', '') or 'Não informado').replace('\n', ' ')[:140], 'score': score, 'subtitle': sub}
+    return {'provider': sub.provider_name, 'release': str(getattr(sub, 'release_info', '') or getattr(sub, 'hearing_impaired', None) and 'Sem release (SDH)' or 'Não informado').replace('\n', ' ')[:140], 'language': 'PT-BR', 'score': score, 'subtitle': sub}
 
 
 def download(path, video, subtitle):
