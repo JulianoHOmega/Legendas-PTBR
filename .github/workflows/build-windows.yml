@@ -7,6 +7,7 @@ on:
     paths:
       - '**.py'
       - 'requirements.txt'
+      - 'assets/**'
       - '.github/workflows/build-windows.yml'
   release:
     types: [published]
@@ -38,7 +39,7 @@ jobs:
       - name: Compilar executavel
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
           if (!(Test-Path 'dist/Legendas-PTBR.exe')) { throw 'Executavel nao encontrado' }
       - name: Publicar EXE como artefato
         uses: actions/upload-artifact@v4
