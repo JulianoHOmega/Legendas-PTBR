@@ -40,11 +40,11 @@ jobs:
       - name: Compilar executavel
         shell: pwsh
         run: |
-          python -m PyInstaller --noconfirm --clean --onefile --windowed --name Legendas-PTBR-v2.1 --icon assets/legendas.ico --add-data "assets/legendas.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
-          if (!(Test-Path 'dist/Legendas-PTBR-v2.1.exe')) { throw 'Executavel nao encontrado' }
+          python -m PyInstaller --noconfirm --clean --onefile --windowed --name OmegaSub --icon assets/omegasub.ico --add-data "assets/omegasub.png;assets" --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          if (!(Test-Path 'dist/OmegaSub.exe')) { throw 'Executavel nao encontrado' }
           @'
           import pefile
-          p = pefile.PE('dist/Legendas-PTBR-v2.1.exe')
+          p = pefile.PE('dist/OmegaSub.exe')
           icon_count = 0
           if hasattr(p, 'DIRECTORY_ENTRY_RESOURCE'):
               for entry in p.DIRECTORY_ENTRY_RESOURCE.entries:
@@ -57,7 +57,7 @@ jobs:
       - name: Publicar EXE como artefato
         uses: actions/upload-artifact@v4
         with:
-          name: Legendas-PTBR-Windows-10
-          path: dist/Legendas-PTBR-v2.1.exe
+          name: OmegaSub-Windows
+          path: dist/OmegaSub.exe
           if-no-files-found: error
           retention-days: 30
