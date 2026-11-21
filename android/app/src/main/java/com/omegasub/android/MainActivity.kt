@@ -10,13 +10,9 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.view.View
 import android.widget.*
-import org.jsoup.Jsoup
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLEncoder
+import com.chaquo.python.Python
+import com.chaquo.python.android.AndroidPlatform
 import java.util.concurrent.Executors
-import java.util.zip.ZipInputStream
-import java.util.zip.GZIPInputStream
 
 /** Busca pública experimental: nenhuma credencial ou chave é solicitada ao usuário. */
 class MainActivity : Activity() {
@@ -34,7 +30,7 @@ class MainActivity : Activity() {
     private var pendingBytes: ByteArray? = null
     private val pickVideo = 100
     private val saveSubtitle = 101
-    private data class Subtitle(val title: String, val pageUrl: String)
+    private data class Subtitle(val title: String, val index: Int)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,9 +63,9 @@ class MainActivity : Activity() {
         mode = Spinner(this).apply {
             adapter = ArrayAdapter(this@MainActivity,
                 android.R.layout.simple_spinner_dropdown_item,
-                listOf("Manual", "Automático (primeira opção)"))
+                listOf("Automático (primeira opção)", "Manual"))
         }
-        mode.setSelection(1)
+        mode.setSelection(0)
         root.addView(mode)
         root.addView(button("Buscar legendas PT-BR") { search() })
         status = text("Selecione um vídeo para começar.", 13f, false)
@@ -81,7 +77,7 @@ class MainActivity : Activity() {
         root.addView(button("Baixar legenda selecionada") {
             if (selectedSub == null) message("Selecione uma legenda primeiro.") else download()
         })
-        root.addView(text("Fonte experimental: Podnapisi. A disponibilidade depende do site e das legendas publicadas. O arquivo é salvo na pasta escolhida por você.", 12f, false))
+        root.addView(text("Motor de busca: Subliminal (Python integrado). Os provedores disponíveis podem exigir credenciais ou estar indisponíveis. Salve a legenda na pasta desejada.", 12f, false))
     }
 
     private fun dp(value: Int) = (value * resources.displayMetrics.density).toInt()
@@ -100,137 +96,61 @@ class MainActivity : Activity() {
     }
     private fun message(value: String) { status.text = value }
 
-    private fun fetch(url: String, maxBytes: Int = 8_000_000): Pair<ByteArray, String> {
-        require(url.startsWith("https://www.podnapisi.net/") || url.startsWith("https://podnapisi.net/")) { "Endereço de origem não permitido" }
-        val connection = URL(url).openConnection() as HttpURLConnection
-        connection.connectTimeout = 12000
-        connection.readTimeout = 20000
-        connection.instanceFollowRedirects = false
-        connection.setRequestProperty("User-Agent", "OmegaSubAndroid/0.2 (subtitle client)")
-        return try {
-            val status = connection.responseCode
-            if (status in 300..399) {
-                val location = connection.getHeaderField("Location") ?: error("Redirecionamento sem destino")
-                val resolved = URL(URL(url), location).toString()
-                connection.disconnect()
-                return fetch(resolved, maxBytes)
-            }
-            if (status !in 200..299) error("Servidor retornou HTTP $status")
-            val bytes = connection.inputStream.use { input ->
-                val output = java.io.ByteArrayOutputStream()
-                val buffer = ByteArray(8192)
-                while (true) {
-                    val n = input.read(buffer)
-                    if (n < 0) break
-                    if (output.size() + n > maxBytes) error("Arquivo excede limite de tamanho")
-                    output.write(buffer, 0, n)
-                }
-                output.toByteArray()
-            }
-            bytes to (connection.contentType ?: "")
-        } finally { connection.disconnect() }
+    private fun pythonModule() : com.chaquo.python.PyObject {
+        if (!Python.isStarted()) Python.start(AndroidPlatform(this))
+        return Python.getInstance().getModule("omegasub_bridge")
     }
 
     private fun search() {
         if (videoName.isBlank()) { message("Selecione um vídeo."); return }
         selectedSub = null
         results.removeAllViews()
-        message("Pesquisando legendas PT-BR...")
-        val query = videoName.substringBeforeLast('.').replace(Regex("[._]+"), " ").trim()
+        message("Buscando legendas PT-BR em provedores compatíveis...")
         executor.execute {
             try {
-                val url = "https://www.podnapisi.net/subtitles/search/?keywords=" +
-                    URLEncoder.encode(query, "UTF-8") + "&language=pb"
-                val html = fetch(url).first.toString(Charsets.UTF_8)
-                val document = Jsoup.parse(html, url)
-                val found = linkedMapOf<String, Subtitle>()
-                for (link in document.select("a[href*=/subtitles/]")) {
-                    val href = link.absUrl("href")
-                    val title = link.text().trim().replace(Regex("\\s+"), " ")
-                    if (title.length < 4 || href.contains("/search/") || href.contains("/download")) continue
-                    if (!href.startsWith("https://www.podnapisi.net/subtitles/") && !href.startsWith("https://podnapisi.net/subtitles/")) continue
-                    // Only subtitle detail pages, not menu/category links.
-                    if (URL(href).path.trimEnd('/').split('/').size < 3) continue
-                    found[href] = Subtitle(title, href)
-                    if (found.size >= 80) break
+                val entries = pythonModule().callAttr("search", videoName).asList()
+                val subtitles = entries.mapIndexed { index, item ->
+                    Subtitle(item.toString(), index)
                 }
                 runOnUiThread {
-                    val subtitles = found.values.toList()
-                    message(if (subtitles.isEmpty()) "Nenhum resultado encontrado. A fonte pode ter alterado sua página ou não possuir legenda PT-BR." else "${subtitles.size} resultado(s) encontrado(s). Confira o título antes de baixar.")
+                    message(if (subtitles.isEmpty()) "Nenhuma legenda PT-BR encontrada pelos provedores disponíveis." else "${subtitles.size} legenda(s) encontrada(s).")
                     subtitles.forEachIndexed { index, sub ->
-                        results.addView(button("${index + 1}. ${sub.title.take(100)}") {
-                            selectedSub = sub; message("Selecionada: ${sub.title}")
+                        results.addView(button("${index + 1}. ${sub.title.take(130)}") {
+                            selectedSub = sub
+                            message("Selecionada: ${sub.title}")
                         })
                     }
-                    if (subtitles.isNotEmpty() && mode.selectedItemPosition == 1) {
-                        selectedSub = subtitles.first(); download()
+                    if (subtitles.isNotEmpty() && mode.selectedItemPosition == 0) {
+                        selectedSub = subtitles.first()
+                        download()
                     }
                 }
-            } catch (e: Exception) { runOnUiThread {
-                val reason = if (e is java.net.UnknownHostException)
-                    "Fonte de legendas indisponível: não foi possível localizar o servidor Podnapisi. Não é um problema com seu vídeo. Uma nova fonte precisa ser integrada."
-                else "Falha na busca: ${e.message}"
-                message(reason)
-            } }
+            } catch (e: Exception) {
+                runOnUiThread { message("Falha na busca: ${e.cause?.message ?: e.message}") }
+            }
         }
     }
 
     private fun download() {
         val sub = selectedSub ?: return
-        message("Obtendo legenda...")
+        message("Baixando legenda PT-BR...")
         executor.execute {
             try {
-                val page = Jsoup.parse(fetch(sub.pageUrl).first.toString(Charsets.UTF_8), sub.pageUrl)
-                val candidates = page.select("a[href*=/download], a[download]")
-                val downloadUrl = candidates.map { it.absUrl("href") }.firstOrNull {
-                    it.startsWith("https://www.podnapisi.net/") || it.startsWith("https://podnapisi.net/")
-                } ?: error("O site não disponibilizou um link de download reconhecido")
-                val (raw, contentType) = fetch(downloadUrl)
-                val subtitleBytes = unpack(raw, contentType)
-                if (subtitleBytes.isEmpty()) error("Legenda vazia")
-                val filename = videoName.substringBeforeLast('.') + ".srt"
+                val bytes = pythonModule().callAttr("download", sub.index).toJava(ByteArray::class.java)
+                if (bytes.isEmpty()) error("O provedor retornou legenda vazia")
                 runOnUiThread {
-                    pendingBytes = subtitleBytes
+                    pendingBytes = bytes
                     startActivityForResult(Intent(Intent.ACTION_CREATE_DOCUMENT).apply {
                         addCategory(Intent.CATEGORY_OPENABLE)
                         type = "application/x-subrip"
-                        putExtra(Intent.EXTRA_TITLE, filename)
+                        putExtra(Intent.EXTRA_TITLE, videoName.substringBeforeLast('.') + ".srt")
                     }, saveSubtitle)
-                    message("Escolha onde salvar $filename")
+                    message("Escolha onde salvar a legenda.")
                 }
-            } catch (e: Exception) { runOnUiThread { message("Falha no download: ${e.message}") } }
-        }
-    }
-
-    private fun unpack(bytes: ByteArray, contentType: String): ByteArray {
-        if (bytes.size >= 2 && bytes[0] == 0x1f.toByte() && bytes[1] == 0x8b.toByte()) {
-            return GZIPInputStream(bytes.inputStream()).use { it.readNBytes(8_000_001) }.also {
-                if (it.size > 8_000_000) error("Legenda grande demais")
+            } catch (e: Exception) {
+                runOnUiThread { message("Falha no download: ${e.cause?.message ?: e.message}") }
             }
         }
-        if (bytes.size >= 4 && bytes[0] == 0x50.toByte() && bytes[1] == 0x4b.toByte()) {
-            ZipInputStream(bytes.inputStream()).use { zip ->
-                while (true) {
-                    val entry = zip.nextEntry ?: break
-                    if (!entry.isDirectory && entry.name.substringAfterLast('/').endsWith(".srt", true)) {
-                        val output = java.io.ByteArrayOutputStream()
-                        val buffer = ByteArray(8192)
-                        while (true) {
-                            val n = zip.read(buffer)
-                            if (n < 0) break
-                            if (output.size() + n > 8_000_000) error("Legenda grande demais")
-                            output.write(buffer, 0, n)
-                        }
-                        return output.toByteArray()
-                    }
-                }
-            }
-            error("O arquivo ZIP não contém legenda .srt")
-        }
-        if (contentType.contains("html", true) || bytes.toString(Charsets.UTF_8).trimStart().startsWith("<!DOCTYPE", true)) {
-            error("O provedor retornou uma página HTML, não uma legenda")
-        }
-        return bytes
     }
 
     @Deprecated("Activity result API")
