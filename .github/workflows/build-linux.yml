@@ -42,20 +42,19 @@ jobs:
           python -m unittest discover -s tests -v
       - name: Compilar aplicativo Linux
         run: |
-          python -m PyInstaller --noconfirm --clean --onedir --windowed --name Legendas-PTBR --add-data 'assets/legendas.png:assets' --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
-          test -x dist/Legendas-PTBR/Legendas-PTBR
+          python -m PyInstaller --noconfirm --clean --onedir --windowed --name OmegaSub --add-data 'assets/omegasub.png:assets' --collect-all subliminal --collect-all babelfish --collect-all guessit --collect-all enzyme main.py
+          test -x dist/OmegaSub/OmegaSub
       - name: Criar pacote TAR.GZ
         run: |
-          mkdir -p package/Legendas-PTBR
-          cp -a dist/Legendas-PTBR/. package/Legendas-PTBR/
-          cp packaging/linux/iniciar.sh package/Legendas-PTBR/iniciar.sh
-          chmod +x package/Legendas-PTBR/iniciar.sh package/Legendas-PTBR/Legendas-PTBR
-          tar -czf Legendas-PTBR-v2.1.1-Linux-x86_64.tar.gz -C package Legendas-PTBR
-          test -s Legendas-PTBR-v2.1.1-Linux-x86_64.tar.gz
+          mkdir -p package/OmegaSub
+          cp -a dist/OmegaSub/. package/OmegaSub/
+          chmod +x package/OmegaSub/OmegaSub
+          tar -czf OmegaSub-Linux-x86_64.tar.gz -C package OmegaSub
+          test -s OmegaSub-Linux-x86_64.tar.gz
       - name: Publicar pacote Linux
         uses: actions/upload-artifact@v4
         with:
-          name: Legendas-PTBR-Linux-TAR-GZ
-          path: Legendas-PTBR-v2.1.1-Linux-x86_64.tar.gz
+          name: OmegaSub-Linux-TAR-GZ
+          path: OmegaSub-Linux-x86_64.tar.gz
           if-no-files-found: error
           retention-days: 30
