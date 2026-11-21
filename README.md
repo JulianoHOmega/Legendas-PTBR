@@ -62,8 +62,8 @@ chmod +x ./OmegaSub
 O projeto utiliza Python e disponibiliza o código-fonte neste repositório.
 
 ```bash
-git clone https://github.com/JulianoHOmega/Legendas-PTBR.git
-cd Legendas-PTBR
+git clone https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR.git
+cd OmegaSub-Legendas-PTBR
 python -m venv .venv
 ```
 
