@@ -94,8 +94,8 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Legendas PT-BR — 2.1')
-        self.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
+        self.setWindowTitle('OmegaSub — Legendas PT-BR · v2.1.1')
+        self.setWindowIcon(QIcon(str(resource_path('assets/omegasub.png'))))
         self.resize(940, 660)
         self.paths = []
         self.matches = []
@@ -105,7 +105,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(root)
         layout = QVBoxLayout(root)
         layout.setSpacing(10)
-        title = QLabel('🎬  Legendas PT-BR  ·  v2.1')
+        title = QLabel('🎬  OmegaSub  ·  Legendas PT-BR')
         title.setStyleSheet('font-size: 24px; font-weight: 700;')
         layout.addWidget(title)
         line = QHBoxLayout()
@@ -293,11 +293,11 @@ if __name__ == '__main__':
     if sys.platform == 'win32':
         try:
             import ctypes
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('LegendasPTBR.Desktop.2.1')
+            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID('OmegaSub.Desktop')
         except Exception:
             logging.exception('Falha ao configurar identidade da barra de tarefas')
     app = QApplication(sys.argv)
-    app.setWindowIcon(QIcon(str(resource_path('assets/legendas.png'))))
+    app.setWindowIcon(QIcon(str(resource_path('assets/omegasub.png'))))
     window = MainWindow()
     window.show()
     enable_dark_title_bar(window)

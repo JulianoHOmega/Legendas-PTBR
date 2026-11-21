@@ -1,6 +1,6 @@
 <div align="center">
 
-# 🎬 Legendas PT-BR
+# 🎬 OmegaSub — Legendas PT-BR
 
 ### Encontre e baixe legendas em português brasileiro para seus filmes e séries
 
@@ -17,7 +17,7 @@
 
 ## ✨ Sobre o projeto
 
-O **Legendas PT-BR** é um aplicativo de desktop para facilitar a busca e o download de legendas em português brasileiro para vídeos locais. Possui interface gráfica, suporte a filmes e episódios de séries e versões para Windows e Linux.
+O **OmegaSub — Legendas PT-BR** é um aplicativo de desktop para facilitar a busca e o download de legendas em português brasileiro para vídeos locais. Possui interface gráfica, suporte a filmes e episódios de séries e versões para Windows e Linux.
 
 ## 🚀 Funcionalidades
 
@@ -46,13 +46,13 @@ Acesse **[Releases](https://github.com/JulianoHOmega/Legendas-PTBR/releases)** p
 
 1. Baixe o pacote Linux `.tar.gz` disponibilizado pelo projeto.
 2. Extraia o arquivo, preservando a estrutura das pastas.
-3. Abra o executável **`Legendas-PTBR`** diretamente dentro da pasta extraída.
+3. Abra o executável **`OmegaSub`** diretamente dentro da pasta extraída.
 
 Se o Linux não permitir a execução por falta de permissão, abra um terminal na pasta do executável e execute:
 
 ```bash
-chmod +x ./Legendas-PTBR
-./Legendas-PTBR
+chmod +x ./OmegaSub
+./OmegaSub
 ```
 
 **Não é necessário usar `iniciar.sh` nem instalar Python** para executar o pacote já compilado. A compatibilidade pode variar conforme a distribuição e as bibliotecas disponíveis no sistema.
@@ -97,3 +97,18 @@ Feito para tornar a busca por legendas PT-BR mais prática. 🇧🇷
 **[⬆️ Voltar ao início](#-legendas-pt-br)**
 
 </div>
+
+
+## Identidade visual
+
+![OmegaSub](assets/omegasub-logo.png)
+
+## Executáveis
+
+- **Windows:** `OmegaSub.exe` (GitHub Actions: `OmegaSub-Windows`).
+- **Linux x86_64:** `OmegaSub-Linux-x86_64.tar.gz` (GitHub Actions: `OmegaSub-Linux-TAR-GZ`). Extraia o pacote e abra diretamente o executável `OmegaSub`, sem `iniciar.sh`.
+- Os workflows disponibilizam artefatos na aba **Actions**; publicar arquivos na aba **Releases** exige anexá-los à release.
+
+## Observação sobre a mudança de nome
+
+A lógica de busca e download de legendas foi preservada. O diretório de logs continua em `~/Legendas-PTBR/`, preservando a localização usada pela versão anterior.

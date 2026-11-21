@@ -1,4 +1,4 @@
-# 🤝 Contribuindo com o Legendas PT-BR
+# 🤝 Contribuindo com o OmegaSub — Legendas PT-BR
 
 Obrigado pelo interesse em melhorar o projeto!
 
@@ -9,7 +9,7 @@ Antes de abrir uma nova [issue](https://github.com/JulianoHOmega/Legendas-PTBR/i
 Para reportar um problema, informe:
 
 - Sistema operacional e versão (Windows ou distribuição Linux).
-- Versão do Legendas PT-BR e forma de execução (`.exe`, `.tar.gz` ou código-fonte).
+- Versão do OmegaSub — Legendas PT-BR e forma de execução (`.exe`, `.tar.gz` ou código-fonte).
 - Passos para reproduzir o erro.
 - Resultado esperado e resultado observado.
 - Mensagem de erro ou log relevante, removendo dados pessoais e caminhos privados.
@@ -28,8 +28,8 @@ Não compartilhe credenciais, tokens nem arquivos de vídeo protegidos por direi
 ## 🛠️ Preparando o ambiente
 
 ```bash
-git clone https://github.com/SEU-USUARIO/Legendas-PTBR.git
-cd Legendas-PTBR
+git clone https://github.com/SEU-USUARIO/OmegaSub.git
+cd OmegaSub
 python -m venv .venv
 ```
 
