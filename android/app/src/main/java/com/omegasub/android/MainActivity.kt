@@ -69,6 +69,7 @@ class MainActivity : Activity() {
                 android.R.layout.simple_spinner_dropdown_item,
                 listOf("Manual", "Automático (primeira opção)"))
         }
+        mode.setSelection(1)
         root.addView(mode)
         root.addView(button("Buscar legendas PT-BR") { search() })
         status = text("Selecione um vídeo para começar.", 13f, false)
@@ -165,7 +166,12 @@ class MainActivity : Activity() {
                         selectedSub = subtitles.first(); download()
                     }
                 }
-            } catch (e: Exception) { runOnUiThread { message("Falha na busca: ${e.message}") } }
+            } catch (e: Exception) { runOnUiThread {
+                val reason = if (e is java.net.UnknownHostException)
+                    "Fonte de legendas indisponível: não foi possível localizar o servidor Podnapisi. Não é um problema com seu vídeo. Uma nova fonte precisa ser integrada."
+                else "Falha na busca: ${e.message}"
+                message(reason)
+            } }
         }
     }
 
