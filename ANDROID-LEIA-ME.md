@@ -1,35 +1,27 @@
-# OmegaSub para Android — primeira versão de testes
+# OmegaSub Android — busca sem chave (protótipo experimental v0.2)
 
-Este pacote **adiciona apenas** `android/`, `.github/workflows/build-android.yml` e este guia. Não altera nenhum arquivo desktop.
+Este pacote contém **somente dois arquivos alterados**. Não altera Windows/Linux, logo ou nome do aplicativo.
 
-## Instalação em um commit
+## Instalação
 
-Extraia o ZIP e envie **o conteúdo**, não a pasta externa, para a raiz do repositório existente. Preserve os diretórios `android/` e `.github/workflows/`. Faça um commit na branch `main`.
+Substitua no repositório:
 
-Em **Actions → Compilar OmegaSub Android APK**, aguarde a compilação. No resumo da execução, baixe o artefato `OmegaSub-Android-debug`, extraia e instale `app-debug.apk` no Android (habilite instalação de fontes autorizadas quando solicitado). É um APK **debug** assinado com chave de desenvolvimento; não é uma versão de loja.
+- `android/app/src/main/java/com/omegasub/android/MainActivity.kt`
+- `android/app/build.gradle.kts`
 
-## O que funciona nesta primeira implementação
+Faça um commit. Em Actions, execute o workflow Android existente e baixe o APK debug.
 
-- Interface nativa Android em tema escuro, com o mesmo nome e arte original do desktop.
-- Seleção de um vídeo por vez pelo seletor de documentos do Android.
-- Busca PT-BR pela API **OpenSubtitles.com** (não a biblioteca Python Subliminal).
-- Lista de resultados com releases; escolha manual ou tentativa automática da primeira opção.
-- Download de `.srt` e seleção da pasta de destino pelo seletor de documentos do Android.
-- API key salva nas preferências locais do aparelho.
+## Funcionamento
 
-## Configurar provedor
+Ao escolher um vídeo, o aplicativo tenta pesquisar na página pública do Podnapisi, filtrando PT-BR, sem exigir conta nem chave. O download usa links publicados nas páginas encontradas e extrai `.srt` de ZIP quando necessário. A interface e o ícone originais são preservados.
 
-Crie sua chave de API em https://www.opensubtitles.com/ e insira no campo do aplicativo. A API pode impor cotas, autenticação adicional ou alterar seus requisitos; erros HTTP serão mostrados na tela. Não coloque uma chave pessoal no repositório público.
+## Limitações IMPORTANTES
 
-## Limitações honestas
+- **Não foi compilado nem testado em dispositivo** neste ambiente.
+- **Não foi possível validar o acesso ao Podnapisi** daqui. Mudanças no HTML, bloqueios ou ausência de legendas podem fazer a busca ou o download falhar.
+- A filtragem por idioma e a estrutura de links dependem do site. Não se deve considerar os resultados garantidamente PT-BR sem confirmação.
+- Este protótipo ainda não replica os múltiplos provedores e o ranqueamento do Subliminal no PC.
+- Confira as regras do provedor antes de distribuir amplamente um cliente que automatiza consultas.
+- Não há chave de API nem servidor próprio, mas há conexão à internet.
 
-- **Não foi compilado/testado neste ambiente.** O GitHub Actions será o primeiro teste de compilação.
-- Não há paridade integral com o desktop: seleção de pasta/lote, identificação avançada de episódios, pontuação Subliminal e vários provedores ainda não foram portados.
-- O modo automático escolhe o primeiro resultado da API, **não garante sincronização**.
-- O Android salva por SAF; o usuário escolhe o destino, e não há sobrescrita silenciosa.
-- Se a API devolver ZIP ou outro formato que não seja SRT/GZIP, será necessária adaptação adicional.
-- O workflow usa `gradle` disponível no runner; se a imagem do GitHub Actions mudar, podemos adicionar o Gradle Wrapper ao projeto.
-
-## Arquivos existentes
-
-Os workflows Windows/Linux, `main.py`, `subtitle_engine.py`, testes e demais arquivos do desktop permanecem intocados.
+Se a compilação falhar, envie o log do Actions; se compilar e não encontrar legendas, envie a mensagem exibida no app para adaptarmos a integração.
