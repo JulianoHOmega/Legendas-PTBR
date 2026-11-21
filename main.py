@@ -94,7 +94,7 @@ class Worker(QObject):
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('OmegaSub — Legendas PT-BR · v2.1.1')
+        self.setWindowTitle('OmegaSub — Legendas PT-BR')
         self.setWindowIcon(QIcon(str(resource_path('assets/omegasub.png'))))
         self.resize(940, 660)
         self.paths = []
