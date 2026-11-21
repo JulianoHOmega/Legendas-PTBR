@@ -299,6 +299,6 @@ if __name__ == '__main__':
     app = QApplication(sys.argv)
     app.setWindowIcon(QIcon(str(resource_path('assets/omegasub.png'))))
     window = MainWindow()
-    window.show()
+    window.showMaximized()
     enable_dark_title_bar(window)
     sys.exit(app.exec())
