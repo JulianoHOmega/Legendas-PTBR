@@ -145,7 +145,7 @@ class MainActivity : Activity() {
                 val found = linkedMapOf<String, Subtitle>()
                 for (link in document.select("a[href*=/subtitles/]")) {
                     val href = link.absUrl("href")
-                    val title = link.text().trim().replace(Regex("\s+"), " ")
+                    val title = link.text().trim().replace(Regex("\\s+"), " ")
                     if (title.length < 4 || href.contains("/search/") || href.contains("/download")) continue
                     if (!href.startsWith("https://www.podnapisi.net/subtitles/") && !href.startsWith("https://podnapisi.net/subtitles/")) continue
                     // Only subtitle detail pages, not menu/category links.
