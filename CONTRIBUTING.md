@@ -4,7 +4,7 @@ Obrigado pelo interesse em melhorar o projeto!
 
 ## 💡 Sugestões e problemas
 
-Antes de abrir uma nova [issue](https://github.com/JulianoHOmega/Legendas-PTBR/issues), verifique se o assunto já foi relatado.
+Antes de abrir uma nova [issue](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/issues), verifique se o assunto já foi relatado.
 
 Para reportar um problema, informe:
 
@@ -23,7 +23,7 @@ Não compartilhe credenciais, tokens nem arquivos de vídeo protegidos por direi
 3. Faça alterações pequenas e focadas.
 4. Teste o funcionamento afetado, especialmente buscas, downloads e identificação de episódios.
 5. Evite modificar a experiência do Windows ao corrigir problemas específicos do Linux, e vice-versa.
-6. Abra um [pull request](https://github.com/JulianoHOmega/Legendas-PTBR/pulls) explicando o que mudou, como testou e se há limitações.
+6. Abra um [pull request](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/pulls) explicando o que mudou, como testou e se há limitações.
 
 ## 🛠️ Preparando o ambiente
 
