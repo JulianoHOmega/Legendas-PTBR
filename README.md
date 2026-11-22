@@ -4,12 +4,12 @@
 
 ### Encontre e baixe legendas em português brasileiro para seus filmes e séries
 
-[![Windows](https://img.shields.io/badge/Windows-compatível-0078D4?logo=windows&logoColor=white)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)
-[![Linux](https://img.shields.io/badge/Linux-x86__64-FCC624?logo=linux&logoColor=black)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)
-[![Python](https://img.shields.io/badge/Python-projeto-3776AB?logo=python&logoColor=white)](https://github.com/JulianoHOmega/Legendas-PTBR)
+[![Windows](https://img.shields.io/badge/Windows-compatível-0078D4?logo=windows&logoColor=white)](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/actions)
+[![Linux](https://img.shields.io/badge/Linux-x86__64-FCC624?logo=linux&logoColor=black)](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/actions)
+[![Python](https://img.shields.io/badge/Python-projeto-3776AB?logo=python&logoColor=white)](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR)
 [![License: MIT](https://img.shields.io/badge/Licença-MIT-green.svg)](LICENSE)
 
-**[📥 Downloads e versões](https://github.com/JulianoHOmega/Legendas-PTBR/releases)** · **[⚙️ Compilações (Actions)](https://github.com/JulianoHOmega/Legendas-PTBR/actions)** · **[🐛 Reportar problema](https://github.com/JulianoHOmega/Legendas-PTBR/issues/new)** · **[🤝 Contribuir](CONTRIBUTING.md)**
+**[📥 Downloads e versões](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/releases)** · **[⚙️ Compilações (Actions)](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/actions)** · **[🐛 Reportar problema](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/issues/new)** · **[🤝 Contribuir](CONTRIBUTING.md)**
 
 </div>
 
@@ -34,7 +34,7 @@ O **OmegaSub — Legendas PT-BR** é um aplicativo de desktop para facilitar a b
 
 ## 📥 Download e uso
 
-Acesse **[Releases](https://github.com/JulianoHOmega/Legendas-PTBR/releases)** para conferir versões publicadas. Caso os executáveis ainda não estejam anexados a uma Release, consulte **[Actions](https://github.com/JulianoHOmega/Legendas-PTBR/actions)** e os artefatos das compilações bem-sucedidas.
+Acesse **[Releases](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/releases)** para conferir versões publicadas. Caso os executáveis ainda não estejam anexados a uma Release, consulte **[Actions](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/actions)** e os artefatos das compilações bem-sucedidas.
 
 ### 🪟 Windows
 
@@ -80,8 +80,8 @@ python main.py
 
 Sugestões, relatórios de bugs e melhorias são bem-vindos! Leia o **[guia de contribuição](CONTRIBUTING.md)** antes de enviar alterações.
 
-- [Abrir uma issue](https://github.com/JulianoHOmega/Legendas-PTBR/issues/new)
-- [Ver pull requests](https://github.com/JulianoHOmega/Legendas-PTBR/pulls)
+- [Abrir uma issue](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/issues/new)
+- [Ver pull requests](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/pulls)
 - [Consultar histórico de alterações](CHANGELOG.md)
 
 ## ⚖️ Licença e responsabilidade
