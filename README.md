@@ -55,7 +55,6 @@ chmod +x ./OmegaSub
 ./OmegaSub
 ```
 
-**Não é necessário usar `iniciar.sh` nem instalar Python** para executar o pacote já compilado. A compatibilidade pode variar conforme a distribuição e as bibliotecas disponíveis no sistema.
 
 ## 🛠️ Código-fonte e desenvolvimento
 
@@ -82,7 +81,6 @@ Sugestões, relatórios de bugs e melhorias são bem-vindos! Leia o **[guia de c
 
 - [Abrir uma issue](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/issues/new)
 - [Ver pull requests](https://github.com/JulianoHOmega/OmegaSub-Legendas-PTBR/pulls)
-- [Consultar histórico de alterações](CHANGELOG.md)
 
 ## ⚖️ Licença e responsabilidade
 
@@ -106,7 +104,7 @@ Feito para tornar a busca por legendas PT-BR mais prática. 🇧🇷
 ## Executáveis
 
 - **Windows:** `OmegaSub.exe` (GitHub Actions: `OmegaSub-Windows`).
-- **Linux x86_64:** `OmegaSub-Linux-x86_64.tar.gz` (GitHub Actions: `OmegaSub-Linux-TAR-GZ`). Extraia o pacote e abra diretamente o executável `OmegaSub`, sem `iniciar.sh`.
+- **Linux x86_64:** `OmegaSub-Linux-x86_64.tar.gz` (GitHub Actions: `OmegaSub-Linux-TAR-GZ`). Extraia o pacote e abra diretamente o executável `OmegaSub`.
 - Os workflows disponibilizam artefatos na aba **Actions**; publicar arquivos na aba **Releases** exige anexá-los à release.
 
 ## Observação sobre a mudança de nome
